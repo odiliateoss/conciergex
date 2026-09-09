@@ -115,17 +115,13 @@ async function generatePlan(apiKey, brief) {
   const systemPrompt = buildSystemPrompt();
   const userPrompt   = buildUserPrompt(brief);
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  // Call our Vercel serverless proxy (/api/generate) instead of OpenAI directly.
+  // This avoids browser CORS restrictions on api.openai.com.
+  const response = await fetch('/api/generate', {
     method: 'POST',
-    headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model:           'gpt-4o',
-      temperature:     0.7,
-      max_tokens:      6000,
-      response_format: { type: 'json_object' },
+      apiKey,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userPrompt   },
@@ -133,16 +129,15 @@ async function generatePlan(apiKey, brief) {
     }),
   });
 
+  const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    const msg = err?.error?.message || `OpenAI API error (${response.status})`;
-    // Surface a clear message for common auth errors
+    const msg = data?.error || `Server error (${response.status})`;
     if (response.status === 401) throw new Error('Invalid API key. Please check your key and try again.');
     if (response.status === 429) throw new Error('Rate limit reached. Please wait a moment and try again.');
     throw new Error(msg);
   }
 
-  const data    = await response.json();
   const content = data.choices?.[0]?.message?.content;
 
   if (!content) throw new Error('OpenAI returned an empty response. Please try again.');
