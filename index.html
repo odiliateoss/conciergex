@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConciergeX — AI Event Planning Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo">
+        <div class="logo-icon">✦</div>
+        <span>Concierge<span class="accent">X</span></span>
+      </div>
+      <p class="header-tagline">AI-Powered Event Planning Assistant</p>
+      <button id="btn-new-event" class="btn btn-outline hidden" onclick="resetApp()">
+        ↺ New Event
+      </button>
+    </div>
+  </header>
+
+  <!-- ── MAIN ───────────────────────────────────────────────────────────── -->
+  <main class="container">
+
+    <!-- API Key banner -->
+    <div id="api-key-banner" class="api-banner">
+      <div class="api-banner-inner">
+        <span class="api-banner-icon">🔑</span>
+        <div>
+          <strong>OpenAI API Key required</strong>
+          <p>Your key is used directly from this page and never stored or sent anywhere except OpenAI.</p>
+        </div>
+        <div class="api-key-field">
+          <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off" />
+          <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FORM VIEW ───────────────────────────────────────────────────── -->
+    <div id="view-form">
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-badge">✦ Powered by GPT-4o</div>
+        <h1>Plan your event in seconds</h1>
+        <p>Fill in your event brief and ConciergeX will generate a complete agenda, planning checklist, budget estimate, all communications, and an event-day action plan — instantly.</p>
+      </div>
+
+      <div class="form-layout">
+        <!-- Form card -->
+        <div class="card form-card">
+          <h2 class="card-title">Event Brief</h2>
+          <p class="card-subtitle">Fill in the details below. The more context you provide, the better the output.</p>
+
+          <form id="event-form" onsubmit="handleSubmit(event)">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="eventName">Event Name <span class="required">*</span></label>
+                <input type="text" id="eventName" placeholder="e.g. TechSummit 2026" required />
+              </div>
+              <div class="form-group">
+                <label for="eventType">Event Type <span class="required">*</span></label>
+                <select id="eventType" required>
+                  <option value="">Select a type…</option>
+                  <option>Corporate Conference</option>
+                  <option>Product Launch</option>
+                  <option>Team Building / Offsite</option>
+                  <option>Gala / Award Ceremony</option>
+                  <option>Workshop / Training</option>
+                  <option>Networking Event</option>
+                  <option>Webinar / Virtual Event</option>
+                  <option>Trade Show / Exhibition</option>
+                  <option>Charity / Fundraiser</option>
+                  <option>Wedding / Social</option>
+                  <option>Government / Official Ceremony</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="objective">Objective <span class="required">*</span></label>
+              <textarea id="objective" rows="3" placeholder="What is the goal of this event? What should attendees leave with?" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="eventDate">Event Date <span class="required">*</span></label>
+                <input type="date" id="eventDate" required />
+              </div>
+              <div class="form-group">
+                <label for="location">Location / Venue <span class="required">*</span></label>
+                <input type="text" id="location" placeholder="e.g. Grand Hyatt, Kuala Lumpur" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="attendees">Expected Attendees <span class="required">*</span></label>
+                <input type="text" id="attendees" placeholder="e.g. 200 – 250" required />
+              </div>
+              <div class="form-group">
+                <label for="budget">Budget <span class="required">*</span></label>
+                <input type="text" id="budget" placeholder="e.g. MYR 80,000 or USD 20,000" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="audience">Target Audience <span class="required">*</span></label>
+              <input type="text" id="audience" placeholder="e.g. Senior tech professionals, CTOs, startup founders" required />
+            </div>
+
+            <div class="form-group">
+              <label for="speakers">Speakers / Key Stakeholders</label>
+              <input type="text" id="speakers" placeholder="e.g. CEO Jane Smith, keynote; Dr. Ali, panel moderator" />
+            </div>
+
+            <div class="form-group">
+              <label for="notes">Additional Notes</label>
+              <textarea id="notes" rows="3" placeholder="Any special requirements, theme, dress code, dietary restrictions, AV needs…"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="btn-generate">
+              <span class="btn-icon">✦</span> Generate Event Plan
+            </button>
+          </form>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <div class="card sidebar-card">
+            <h3>What you'll get</h3>
+            <ul class="feature-list">
+              <li>📋 Executive summary</li>
+              <li>🗓 Detailed event agenda</li>
+              <li>✅ Full planning checklist</li>
+              <li>💰 Budget breakdown</li>
+              <li>📧 6 ready-to-send emails</li>
+              <li>⚡ Event-day action plan</li>
+            </ul>
+          </div>
+          <div class="card sidebar-card tips-card">
+            <h3>💡 Tips for best results</h3>
+            <ul class="tips-list">
+              <li>Be specific with your objective</li>
+              <li>Include named speakers or stakeholders</li>
+              <li>Add your theme or dress code in notes</li>
+              <li>Mention any special AV or catering needs</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ── LOADING VIEW ────────────────────────────────────────────────── -->
+    <div id="view-loading" class="hidden">
+      <div class="loading-card card">
+        <div class="loading-icon">✦</div>
+        <h2>Building your event plan…</h2>
+        <p>GPT-4o is crafting your agenda, checklist, budget, and communications.<br>This may take 20–40 seconds.</p>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- ── ERROR VIEW ──────────────────────────────────────────────────── -->
+    <div id="view-error" class="hidden">
+      <div class="error-card card">
+        <span class="error-icon">⚠</span>
+        <div>
+          <strong>Generation failed</strong>
+          <p id="error-message"></p>
+        </div>
+      </div>
+      <button class="btn btn-outline mt-4" onclick="showForm()">← Back to form</button>
+    </div>
+
+    <!-- ── RESULTS VIEW ────────────────────────────────────────────────── -->
+    <div id="view-results" class="hidden">
+      <div class="results-header">
+        <div>
+          <h2>Your Event Plan</h2>
+          <p class="results-subtitle">Generated by ConciergeX — click any tab to explore</p>
+        </div>
+        <button class="btn btn-outline" onclick="resetApp()">↺ Plan a new event</button>
+      </div>
+
+      <!-- Tab nav -->
+      <nav class="tab-nav" role="tablist">
+        <button class="tab-btn active" data-tab="summary"    onclick="switchTab(this)" role="tab">📋 Summary</button>
+        <button class="tab-btn"        data-tab="agenda"     onclick="switchTab(this)" role="tab">🗓 Agenda</button>
+        <button class="tab-btn"        data-tab="checklist"  onclick="switchTab(this)" role="tab">✅ Checklist</button>
+        <button class="tab-btn"        data-tab="budget"     onclick="switchTab(this)" role="tab">💰 Budget</button>
+        <button class="tab-btn"        data-tab="comms"      onclick="switchTab(this)" role="tab">📧 Communications</button>
+        <button class="tab-btn"        data-tab="actionplan" onclick="switchTab(this)" role="tab">⚡ Event Day</button>
+      </nav>
+
+      <!-- Tab panels -->
+      <div class="card tab-content">
+
+        <!-- Summary -->
+        <div id="tab-summary" class="tab-panel active">
+          <div class="panel-header">
+            <h3>Executive Summary</h3>
+            <button class="btn-copy" onclick="copySection('summary-text')">⧉ Copy</button>
+          </div>
+          <div id="summary-text" class="summary-box"></div>
+        </div>
+
+        <!-- Agenda -->
+        <div id="tab-agenda" class="tab-panel hidden">
+          <div class="panel-header">
+            <h3>Event Agenda</h3>
+            <button class="btn-copy" onclick="copySection('agenda-table-text')">⧉ Copy</button>
+          </div>
+          <div class="table-wrap">
+            <table id="agenda-table">
+              <thead>
+                <tr><th>Time</th><th>Activity</th><th>Owner</th><th>Notes</th></tr>
+              </thead>
+              <tbody id="agenda-body"></tbody>
+            </table>
+          </div>
+          <textarea id="agenda-table-text" class="hidden-copy-source"></textarea>
+        </div>
+
+        <!-- Checklist -->
+        <div id="tab-checklist" class="tab-panel hidden">
+          <div class="panel-header">
+            <h3>Planning Checklist</h3>
+            <button class="btn-copy" onclick="copySection('checklist-text')">⧉ Copy</button>
+          </div>
+          <div id="checklist-body"></div>
+          <textarea id="checklist-text" class="hidden-copy-source"></textarea>
+        </div>
+
+        <!-- Budget -->
+        <div id="tab-budget" class="tab-panel hidden">
+          <div class="panel-header">
+            <h3>Budget Estimate</h3>
+            <button class="btn-copy" onclick="copySection('budget-table-text')">⧉ Copy</button>
+          </div>
+          <div class="table-wrap">
+            <table id="budget-table">
+              <thead>
+                <tr><th>Category</th><th>Estimated Cost</th><th>Notes</th></tr>
+              </thead>
+              <tbody id="budget-body"></tbody>
+            </table>
+          </div>
+          <p class="disclaimer">* Estimates are AI-generated and should be validated against actual vendor quotes.</p>
+          <textarea id="budget-table-text" class="hidden-copy-source"></textarea>
+        </div>
+
+        <!-- Communications -->
+        <div id="tab-comms" class="tab-panel hidden">
+          <div class="panel-header">
+            <h3>Communications</h3>
+          </div>
+          <div class="comms-tabs">
+            <button class="comm-btn active" data-comm="saveTheDate"      onclick="switchComm(this)">📅 Save the Date</button>
+            <button class="comm-btn"        data-comm="invitation"       onclick="switchComm(this)">✉ Invitation</button>
+            <button class="comm-btn"        data-comm="reminder"         onclick="switchComm(this)">🔔 Reminder</button>
+            <button class="comm-btn"        data-comm="speakerBriefing"  onclick="switchComm(this)">🎤 Speaker Briefing</button>
+            <button class="comm-btn"        data-comm="vendorBriefing"   onclick="switchComm(this)">🏪 Vendor Briefing</button>
+            <button class="comm-btn"        data-comm="postEventFollowUp" onclick="switchComm(this)">💌 Follow-Up</button>
+          </div>
+          <div class="comm-content-wrap">
+            <button class="btn-copy" onclick="copyActiveComm()">⧉ Copy</button>
+            <pre id="comm-content" class="comm-content"></pre>
+          </div>
+        </div>
+
+        <!-- Event Day Action Plan -->
+        <div id="tab-actionplan" class="tab-panel hidden">
+          <div class="panel-header">
+            <h3>Event Day Action Plan</h3>
+            <button class="btn-copy" onclick="copySection('action-text')">⧉ Copy</button>
+          </div>
+          <div id="action-progress-wrap">
+            <span id="action-progress-label" class="progress-label">0 of 0 steps complete</span>
+            <div class="progress-bar">
+              <div id="action-progress-fill" class="progress-fill" style="width:0%"></div>
+            </div>
+          </div>
+          <ol id="action-body" class="action-list"></ol>
+          <textarea id="action-text" class="hidden-copy-source"></textarea>
+        </div>
+
+      </div><!-- /.tab-content -->
+    </div><!-- /#view-results -->
+
+  </main>
+
+  <footer class="site-footer">
+    <p>ConciergeX &nbsp;·&nbsp; AI-Powered Event Planning &nbsp;·&nbsp; Outputs are AI-generated and should be reviewed before use</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
